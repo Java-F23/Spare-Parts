@@ -9,8 +9,9 @@ public class CarSparePartsSystem {
     private final Scanner scanner = new Scanner(System.in);
     private final String adminPassword = "admin123"; // Simple hardcoded password for demonstration
 
-    public static void main(String[] args) {
+    public static void main(String[] args) {   
         CarSparePartsSystem system = new CarSparePartsSystem();
+
         system.run();
     }
 
@@ -19,21 +20,27 @@ public class CarSparePartsSystem {
         System.out.println("Are you an Admin or a User?");
         System.out.println("1. Admin");
         System.out.println("2. User");
+        System.out.println("3. Exit");
         System.out.print("Choose an option: ");
 
         int userType = scanner.nextInt();
+        scanner.nextLine();
         if (userType == 1) {
             // Admin login
             adminLogin();
-        } else {
+        } else if(userType == 2) {
             // User functionalities
             userMenu();
         }
+        else {
+        	System.out.println("Have a nice day!");
+        }
+        
     }
 
     private void adminLogin() {
         System.out.print("Enter Admin Password: ");
-        String inputPassword = scanner.next();
+        String inputPassword = scanner.nextLine();
 
         if (adminPassword.equals(inputPassword)) {
             adminMenu();
@@ -52,6 +59,7 @@ public class CarSparePartsSystem {
             System.out.print("Choose an option: ");
 
             int option = scanner.nextInt();
+            scanner.nextLine();
             switch (option) {
                 case 1:
                     addSparePart();
@@ -60,8 +68,7 @@ public class CarSparePartsSystem {
                     editSparePart();
                     break;
                 case 3:
-                    exit = true;
-                    break;
+                    run();
                 default:
                     System.out.println("Invalid option. Please try again.");
             }
@@ -78,6 +85,7 @@ public class CarSparePartsSystem {
             System.out.print("Choose an option: ");
 
             int option = scanner.nextInt();
+            scanner.nextLine();
             switch (option) {
                 case 1:
                     viewSpareParts();
@@ -86,8 +94,7 @@ public class CarSparePartsSystem {
                     searchSpareParts();
                     break;
                 case 3:
-                    exit = true;
-                    break;
+                    run();
                 default:
                     System.out.println("Invalid option. Please try again.");
             }
@@ -95,14 +102,14 @@ public class CarSparePartsSystem {
     }
 
     private void addSparePart() {
-        System.out.println("Enter spare part name:");
-        String name = scanner.next();
+        System.out.print("Enter spare part name: ");
+        String name = scanner.nextLine();
 
-        System.out.println("Enter spare part type:");
-        String type = scanner.next();
+        System.out.print("Enter spare part type: ");
+        String type = scanner.nextLine();
 
-        System.out.println("Enter spare part specifications:");
-        String specifications = scanner.next();
+        System.out.print("Enter spare part specifications: ");
+        String specifications = scanner.nextLine();
 
         SparePart newSparePart = new SparePart(name, type, specifications);
         sparePartsInventory.add(newSparePart);
@@ -118,8 +125,8 @@ public class CarSparePartsSystem {
     }
 
     private void searchSpareParts() {
-        System.out.println("Enter search type:");
-        String type = scanner.next();
+        System.out.print("Search Name: ");
+        String type = scanner.nextLine();
 
         List<SparePart> results = sparePartsInventory.stream()
                 .filter(sparePart -> sparePart.getType().equalsIgnoreCase(type))
@@ -133,8 +140,8 @@ public class CarSparePartsSystem {
     }
 
     private void editSparePart() {
-        System.out.println("Enter spare part name to edit:");
-        String name = scanner.next();
+        System.out.print("Enter spare part name to edit: ");
+        String name = scanner.nextLine();
 
         Optional<SparePart> sparePartOptional = sparePartsInventory.stream()
                 .filter(sparePart -> sparePart.getName().equalsIgnoreCase(name))
@@ -143,11 +150,11 @@ public class CarSparePartsSystem {
         if (sparePartOptional.isPresent()) {
             SparePart sparePart = sparePartOptional.get();
 
-            System.out.println("Enter new type:");
-            sparePart.setType(scanner.next());
+            System.out.print("Enter new type: ");
+            sparePart.setType(scanner.nextLine());
 
-            System.out.println("Enter new specifications:");
-            sparePart.setSpecifications(scanner.next());
+            System.out.print("Enter new specifications: ");
+            sparePart.setSpecifications(scanner.nextLine());
 
             System.out.println("Spare part updated successfully!");
         } else {
