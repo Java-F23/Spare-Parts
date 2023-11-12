@@ -1,209 +1,39 @@
 package CarSparePartsSystem;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Scanner;
 
 public class CarSparePartsSystem {
 
-    private final List<SparePart> sparePartsInventory = new ArrayList<>();
-    private final Scanner scanner = new Scanner(System.in);
-    private final String adminPassword = "admin123"; // Simple hardcoded password for demonstration
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Inventory inventory = new Inventory();
+        OrderManager orderManager = new OrderManager();
+        User user = new User(inventory);
+        Admin admin = new Admin(inventory, orderManager);
 
-    public static void main(String[] args) {   
-        CarSparePartsSystem system = new CarSparePartsSystem();
-
-        system.run();
-    }
-
-    private void run() {
-        System.out.println("Welcome to the Car Spare Parts Management System");
-        System.out.println("Are you an Admin or a User?");
-        System.out.println("1. Admin");
-        System.out.println("2. User");
-        System.out.println("3. Exit");
-        System.out.print("Choose an option: ");
-
-        int userType = scanner.nextInt();
-        scanner.nextLine();
-        if (userType == 1) {
-            // Admin login
-            adminLogin();
-        } else if(userType == 2) {
-            // User functionalities
-            userMenu();
-        }
-        else {
-        	System.out.println("Have a nice day!");
-        }
-        
-    }
-
-    private void adminLogin() {
-        System.out.print("Enter Admin Password: ");
-        String inputPassword = scanner.nextLine();
-
-        if (adminPassword.equals(inputPassword)) {
-            adminMenu();
-        } else {
-            System.out.println("Incorrect password. Access denied.");
-        }
-    }
-
-    private void adminMenu() {
-        boolean exit = false;
-        while (!exit) {
-            System.out.println("Admin Menu:");
-            System.out.println("1. Add Spare Part");
-            System.out.println("2. Edit Spare Part");
+        while (true) {
+            System.out.println("Welcome to the Car Spare Parts System");
+            System.out.println("1. Enter User Mode");
+            System.out.println("2. Enter Admin Mode");
             System.out.println("3. Exit");
             System.out.print("Choose an option: ");
 
-            int option = scanner.nextInt();
-            scanner.nextLine();
-            switch (option) {
+            int choice = scanner.nextInt();
+
+            switch (choice) {
                 case 1:
-                    addSparePart();
+                    user.userMode();
                     break;
                 case 2:
-                    editSparePart();
+                    admin.adminMode();
                     break;
                 case 3:
-                    run();
+                    System.out.println("Exiting system...");
+                    System.exit(0);
+                    break;
                 default:
                     System.out.println("Invalid option. Please try again.");
             }
-        }
-    }
-
-    private void userMenu() {
-        boolean exit = false;
-        while (!exit) {
-            System.out.println("User Menu:");
-            System.out.println("1. View Spare Parts");
-            System.out.println("2. Search Spare Parts");
-            System.out.println("3. Exit");
-            System.out.print("Choose an option: ");
-
-            int option = scanner.nextInt();
-            scanner.nextLine();
-            switch (option) {
-                case 1:
-                    viewSpareParts();
-                    break;
-                case 2:
-                    searchSpareParts();
-                    break;
-                case 3:
-                    run();
-                default:
-                    System.out.println("Invalid option. Please try again.");
-            }
-        }
-    }
-
-    private void addSparePart() {
-        System.out.print("Enter spare part name: ");
-        String name = scanner.nextLine();
-
-        System.out.print("Enter spare part type: ");
-        String type = scanner.nextLine();
-
-        System.out.print("Enter spare part specifications: ");
-        String specifications = scanner.nextLine();
-
-        SparePart newSparePart = new SparePart(name, type, specifications);
-        sparePartsInventory.add(newSparePart);
-        System.out.println("Spare part added successfully!");
-    }
-
-    private void viewSpareParts() {
-        if (sparePartsInventory.isEmpty()) {
-            System.out.println("No spare parts available.");
-        } else {
-            sparePartsInventory.forEach(System.out::println);
-        }
-    }
-
-    private void searchSpareParts() {
-        System.out.print("Search Name: ");
-        String type = scanner.nextLine();
-
-        List<SparePart> results = sparePartsInventory.stream()
-                .filter(sparePart -> sparePart.getType().equalsIgnoreCase(type))
-                .collect(Collectors.toList());
-
-        if (results.isEmpty()) {
-            System.out.println("No spare parts found for type: " + type);
-        } else {
-            results.forEach(System.out::println);
-        }
-    }
-
-    private void editSparePart() {
-        System.out.print("Enter spare part name to edit: ");
-        String name = scanner.nextLine();
-
-        Optional<SparePart> sparePartOptional = sparePartsInventory.stream()
-                .filter(sparePart -> sparePart.getName().equalsIgnoreCase(name))
-                .findFirst();
-
-        if (sparePartOptional.isPresent()) {
-            SparePart sparePart = sparePartOptional.get();
-
-            System.out.print("Enter new type: ");
-            sparePart.setType(scanner.nextLine());
-
-            System.out.print("Enter new specifications: ");
-            sparePart.setSpecifications(scanner.nextLine());
-
-            System.out.println("Spare part updated successfully!");
-        } else {
-            System.out.println("Spare part not found: " + name);
-        }
-    }
-
-    static class SparePart {
-        private String name;
-        private String type;
-        private String specifications;
-
-        public SparePart(String name, String type, String specifications) {
-            this.name = name;
-            this.type = type;
-            this.specifications = specifications;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public String getSpecifications() {
-            return specifications;
-        }
-
-        public void setSpecifications(String specifications) {
-            this.specifications = specifications;
-        }
-
-        @Override
-        public String toString() {
-            return "SparePart{" +
-                    "name='" + name + '\'' +
-                    ", type='" + type + '\'' +
-                    ", specifications='" + specifications + '\'' +
-                    '}';
         }
     }
 }
