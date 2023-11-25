@@ -22,6 +22,20 @@ public class SparePart {
         this.warrantyInfo = warrantyInfo;
         this.maintenanceHistory = maintenanceHistory;
     }
+    
+    public String toString() {
+        return "SparePart{" +
+               "id='" + id + '\'' +
+               ", name='" + name + '\'' +
+               ", type='" + type + '\'' +
+               ", category='" + category + '\'' +
+               ", specifications='" + specifications + '\'' +
+               ", stockLevel=" + stockLevel +
+               ", price=" + price +
+               ", warrantyInfo='" + warrantyInfo + '\'' +
+               ", maintenanceHistory='" + maintenanceHistory + '\'' +
+               '}';
+    }
 
     // Getters
     public String getId() { return id; }

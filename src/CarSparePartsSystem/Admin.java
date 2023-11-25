@@ -1,116 +1,254 @@
 package CarSparePartsSystem;
 
+import javax.swing.*; 
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Scanner;
 import java.util.List;
-
+import java.util.Vector;
+import java.util.Optional;
 
 public class Admin {
-	private Scanner scanner = new Scanner(System.in);
-    private Inventory inventory; // Manages spare parts
-    private OrderManager orderManager; // Manages orders
+    private JFrame frame;
+    private Inventory inventory;
+    private OrderManager orderManager;
 
     public Admin(Inventory inventory, OrderManager orderManager) {
         this.inventory = inventory;
         this.orderManager = orderManager;
     }
-    
+
     public void adminMode() {
-    	String id, name, type, category, specifications, warrantyInfo, maintenanceHistory;
-        int stockLevel;
-        double price;
-        boolean running = true;
-        while (running) {
-            System.out.println("\nAdmin Mode - Choose an option:");
-            System.out.println("1. Add New Spare Part");
-            System.out.println("2. Edit Spare Part");
-            System.out.println("3. Manage Inventory");
-            System.out.println("4. Categorize Spare Parts");
-            System.out.println("5. Track and Manage Orders");
-            System.out.println("6. Manage Shipment and Delivery");
-            System.out.println("7. Exit");
+        // Initialize the GUI components
+        frame = new JFrame("Admin Mode");
+        frame.setLayout(new GridLayout(0, 1)); // Grid layout for buttons
+        frame.setSize(600, 400);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+        // Add New Spare Part Button
+        JButton addPartButton = new JButton("Add New Spare Part");
+        addPartButton.addActionListener(e -> showAddPartDialog());
+        frame.add(addPartButton);
 
-            switch (choice) {
-                case 1:
+        // Edit Spare Part Button
+        JButton editPartButton = new JButton("Edit Spare Part");
+        editPartButton.addActionListener(e -> showEditPartDialog());
+        frame.add(editPartButton);
 
-                     // Prompt the user for input and read values
-                     System.out.print("Enter ID: ");
-                     id = scanner.nextLine();
+        // Manage Inventory Button
+        JButton manageInventoryButton = new JButton("Manage Inventory");
+        manageInventoryButton.addActionListener(e -> manageInventory());
+        frame.add(manageInventoryButton);
 
-                     System.out.print("Enter Name: ");
-                     name = scanner.nextLine();
+        // Categorize Spare Parts Button
+        JButton categorizePartsButton = new JButton("Categorize Spare Parts");
+        categorizePartsButton.addActionListener(e -> showCategorizePartDialog());
+        frame.add(categorizePartsButton);
 
-                     System.out.print("Enter Type: ");
-                     type = scanner.nextLine();
+        // Track and Manage Orders Button
+        JButton manageOrdersButton = new JButton("Track and Manage Orders");
+        manageOrdersButton.addActionListener(e -> trackAndManageOrders());
+        frame.add(manageOrdersButton);
 
-                     System.out.print("Enter Category: ");
-                     category = scanner.nextLine();
+        // Manage Shipment and Delivery Button
+        JButton manageShipmentButton = new JButton("Manage Shipment and Delivery");
+        manageShipmentButton.addActionListener(e -> manageShipmentAndDelivery());
+        frame.add(manageShipmentButton);
 
-                     System.out.print("Enter Specifications: ");
-                     specifications = scanner.nextLine();
+        frame.setVisible(true);
+    }
+    
+    private void showAddPartDialog() {
+        JDialog dialog = new JDialog(frame, "Add New Spare Part", true);
+        dialog.setLayout(new GridLayout(0, 2));
+        dialog.setSize(400, 300);
 
-                     System.out.print("Enter Stock Level: ");
-                     stockLevel = scanner.nextInt();
-                     scanner.nextLine(); // Consume newline
+        // Add input fields and labels
+        dialog.add(new JLabel("ID:"));
+        JTextField idField = new JTextField(10);
+        dialog.add(idField);
 
-                     System.out.print("Enter Price: ");
-                     price = scanner.nextDouble();
-                     scanner.nextLine(); // Consume newline
+        dialog.add(new JLabel("Name:"));
+        JTextField nameField = new JTextField(10);
+        dialog.add(nameField);
 
-                     System.out.print("Enter Warranty Information: ");
-                     warrantyInfo = scanner.nextLine();
+        dialog.add(new JLabel("Type:"));
+        JTextField typeField = new JTextField(10);
+        dialog.add(typeField);
 
-                     System.out.print("Enter Maintenance History: ");
-                     maintenanceHistory = scanner.nextLine();
-                    addNewSparePart(id, name, type, category, specifications, stockLevel, price, warrantyInfo, maintenanceHistory);
-                    break;
-                case 2:
-                    // Prompt the user for input and read values
-                    System.out.print("Enter Part ID: ");
-                    id = scanner.nextLine();
+        dialog.add(new JLabel("Category:"));
+        JTextField categoryField = new JTextField(10);
+        dialog.add(categoryField);
 
-                    System.out.print("Enter New Name: ");
-                    name = scanner.nextLine();
+        dialog.add(new JLabel("Specifications:"));
+        JTextField specificationsField = new JTextField(10);
+        dialog.add(specificationsField);
 
-                    System.out.print("Enter New Type: ");
-                    type = scanner.nextLine();
+        dialog.add(new JLabel("Stock Level:"));
+        JTextField stockLevelField = new JTextField(10);
+        dialog.add(stockLevelField);
 
-                    System.out.print("Enter New Specifications: ");
-                    specifications = scanner.nextLine();
-                    editSparePart(id, name, type, specifications);
-                    break;
-                case 3:
-                    manageInventory();
-                    break;
-                case 4:
-                	System.out.print("Enter Part ID: ");
-                    id = scanner.nextLine();
-                    System.out.print("Enter Category: ");
-                    category = scanner.nextLine();
-                    categorizeSpareParts(id, category);
-                    break;
-                case 5:
-                    trackAndManageOrders();
-                    break;
-                case 6:
-                    manageShipmentAndDelivery();
-                    break;
-                case 7:
-                    running = false;
-                    break;
-                default:
-                    System.out.println("Invalid option. Please try again.");
+        dialog.add(new JLabel("Price:"));
+        JTextField priceField = new JTextField(10);
+        dialog.add(priceField);
+
+        dialog.add(new JLabel("Warranty Information:"));
+        JTextField warrantyInfoField = new JTextField(10);
+        dialog.add(warrantyInfoField);
+
+        dialog.add(new JLabel("Maintenance History:"));
+        JTextField maintenanceHistoryField = new JTextField(10);
+        dialog.add(maintenanceHistoryField);
+
+        // Add Submit and Cancel buttons
+        JButton submitButton = new JButton("Submit");
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Retrieve data from fields and add new spare part
+                String id = idField.getText();
+                String name = nameField.getText();
+                String type = typeField.getText();
+                String category = categoryField.getText();
+                String specifications = specificationsField.getText();
+                int stockLevel = Integer.parseInt(stockLevelField.getText());
+                double price = Double.parseDouble(priceField.getText());
+                String warrantyInfo = warrantyInfoField.getText();
+                String maintenanceHistory = maintenanceHistoryField.getText();
+
+                addNewSparePart(id, name, type, category, specifications, stockLevel, price, warrantyInfo, maintenanceHistory);
+                dialog.dispose();
             }
-        }
+        });
+        dialog.add(submitButton);
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(e -> dialog.dispose());
+        dialog.add(cancelButton);
+
+        dialog.setVisible(true);
+    }
+    
+    private void showEditPartDialog() {
+        JDialog dialog = new JDialog(frame, "Edit Spare Part", true);
+        dialog.setLayout(new GridLayout(0, 2));
+        dialog.setSize(400, 300);
+
+        // Add input fields and labels
+        dialog.add(new JLabel("ID:"));
+        JTextField idField = new JTextField(10);
+        dialog.add(idField);
+
+        dialog.add(new JLabel("New Name:"));
+        JTextField nameField = new JTextField(10);
+        dialog.add(nameField);
+
+        dialog.add(new JLabel("New Type:"));
+        JTextField typeField = new JTextField(10);
+        dialog.add(typeField);
+
+        dialog.add(new JLabel("New Specifications:"));
+        JTextField specificationsField = new JTextField(10);
+        dialog.add(specificationsField);
+
+        // Add Submit and Cancel buttons
+        JButton submitButton = new JButton("Submit");
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Retrieve data from fields and edit the spare part
+                String partId = idField.getText();
+                String newName = nameField.getText();
+                String newType = typeField.getText();
+                String newSpecifications = specificationsField.getText();
+
+                editSparePart(partId, newName, newType, newSpecifications);
+                dialog.dispose();
+            }
+        });
+        dialog.add(submitButton);
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(e -> dialog.dispose());
+        dialog.add(cancelButton);
+
+        dialog.setVisible(true);
+    }
+    
+    private void showCategorizePartDialog() {
+        JDialog dialog = new JDialog(frame, "Categorize Spare Part", true);
+        dialog.setLayout(new GridLayout(0, 2));
+        dialog.setSize(400, 200);
+
+        // Add input fields and labels
+        dialog.add(new JLabel("Part ID:"));
+        JTextField idField = new JTextField(10);
+        dialog.add(idField);
+
+        dialog.add(new JLabel("New Category:"));
+        JTextField categoryField = new JTextField(10);
+        dialog.add(categoryField);
+
+        // Add Submit and Cancel buttons
+        JButton submitButton = new JButton("Submit");
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Retrieve data from fields and categorize the spare part
+                String partId = idField.getText();
+                String newCategory = categoryField.getText();
+
+                categorizeSpareParts(partId, newCategory);
+                dialog.dispose();
+            }
+        });
+        dialog.add(submitButton);
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(e -> dialog.dispose());
+        dialog.add(cancelButton);
+
+        dialog.setVisible(true);
+    }
+    
+    private void showRemovePartDialog() {
+        JDialog dialog = new JDialog(frame, "Remove Spare Part", true);
+        dialog.setLayout(new GridLayout(0, 2));
+        dialog.setSize(400, 200);
+
+        // Input field for part ID
+        dialog.add(new JLabel("Part ID:"));
+        JTextField idField = new JTextField(10);
+        dialog.add(idField);
+
+        // Submit and Cancel buttons
+        JButton submitButton = new JButton("Remove");
+        submitButton.addActionListener(e -> {
+            String id = idField.getText();
+            removePartFromInventory(id);
+            dialog.dispose();
+        });
+        dialog.add(submitButton);
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(e -> dialog.dispose());
+        dialog.add(cancelButton);
+
+        dialog.setVisible(true);
     }
 
     // 1. Add New Spare Parts
     public void addNewSparePart(String id, String name, String type, String category, String specifications, int stockLevel, double price, String warrantyInfo, String maintenanceHistory) {
         SparePart newPart = new SparePart(id, name, type, category, specifications, stockLevel, price, warrantyInfo, maintenanceHistory);
         inventory.addSparePart(newPart);
-        System.out.println("New spare part added: " + name);
+        final JDialog addedDialog = new JDialog(frame, "Update", true);
+        JLabel addedLabel = new JLabel("New Spare Part Added!", SwingConstants.CENTER);
+        addedDialog.add(addedLabel);
+        addedDialog.setSize(300, 200);
+        addedDialog.setLocationRelativeTo(frame);
+        new Timer(1000, e -> addedDialog.dispose()).start();
+        addedDialog.setVisible(true);
     }
 
     // 2. Edit and Update Spare Parts
@@ -120,95 +258,92 @@ public class Admin {
             part.setName(newName);
             part.setType(newType);
             part.setSpecifications(newSpecifications);
-            System.out.println("Spare part updated: " + partId);
+            
+            final JDialog updatedDialog = new JDialog(frame, "Update", true);
+            JLabel updatedLabel = new JLabel("Spare Part Updated " + partId + "!" , SwingConstants.CENTER);
+            updatedDialog.add(updatedLabel);
+            updatedDialog.setSize(300, 200);
+            updatedDialog.setLocationRelativeTo(frame);
+            new Timer(1000, e -> updatedDialog.dispose()).start();
+            updatedDialog.setVisible(true);
         } else {
-            System.out.println("Spare part not found.");
+        	final JDialog notfoundDialog = new JDialog(frame, "Update", true);
+            JLabel notfoundLabel = new JLabel("Spare Part not found!", SwingConstants.CENTER);
+            notfoundDialog.add(notfoundLabel);
+            notfoundDialog.setSize(300, 200);
+            notfoundDialog.setLocationRelativeTo(frame);
+            new Timer(1000, e -> notfoundDialog.dispose()).start();
+            notfoundDialog.setVisible(true);
         }
     }
 
- // 3. Manage Inventory of Spare Parts
-    public void manageInventory() {
-        boolean managingInventory = true;
-        while (managingInventory) {
-            System.out.println("\nInventory Management - Choose an option:");
-            System.out.println("1. View Inventory");
-            System.out.println("2. Add Spare Part to Inventory");
-            System.out.println("3. Remove Spare Part from Inventory");
-            System.out.println("4. Return to Admin Mode");
+    private void manageInventory() {
+        JFrame inventoryFrame = new JFrame("Inventory Management");
+        inventoryFrame.setLayout(new GridLayout(0, 1));
+        inventoryFrame.setSize(400, 300);
 
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+        // Button to view inventory
+        JButton viewInventoryButton = new JButton("View Inventory");
+        viewInventoryButton.addActionListener(e -> displayInventory());
+        inventoryFrame.add(viewInventoryButton);
 
-            switch (choice) {
-                case 1:
-                    // View Inventory
-                    displayInventory();
-                    break;
-                case 2:
-                    // Add Spare Part to Inventory
-                    addPartToInventory();
-                    break;
-                case 3:
-                    // Remove Spare Part from Inventory
-                    removePartFromInventory();
-                    break;
-                case 4:
-                    managingInventory = false;
-                    break;
-                default:
-                    System.out.println("Invalid option. Please try again.");
-            }
-        }
+        // Button to add a spare part
+        JButton addPartButton = new JButton("Add Spare Part");
+        addPartButton.addActionListener(e -> showAddPartDialog());
+        inventoryFrame.add(addPartButton);
+
+        // Button to remove a spare part
+        JButton removePartButton = new JButton("Remove Spare Part");
+        removePartButton.addActionListener(e -> showRemovePartDialog());
+        inventoryFrame.add(removePartButton);
+
+        // Button to return to admin mode
+        JButton returnButton = new JButton("Return");
+        returnButton.addActionListener(e -> inventoryFrame.dispose());
+        inventoryFrame.add(returnButton);
+
+        inventoryFrame.setVisible(true);
     }
 
     private void displayInventory() {
+        JDialog inventoryDialog = new JDialog(frame, "Inventory", true);
+        inventoryDialog.setLayout(new BorderLayout());
+        inventoryDialog.setSize(500, 400);
+
+        // Assuming you have a method to get a list or array of SparePart objects
         List<SparePart> parts = inventory.getSpareParts();
-        if (parts.isEmpty()) {
-            System.out.println("Inventory is empty.");
-        } else {
-            System.out.println("Current Inventory:");
-            for (SparePart part : parts) {
-                System.out.println(part); // Assuming SparePart class has a meaningful toString() method
-            }
-        }
+
+        // Display parts in a scrollable list or table
+        JList<SparePart> partsList = new JList<>(new Vector<>(parts));
+        JScrollPane scrollPane = new JScrollPane(partsList);
+        inventoryDialog.add(scrollPane, BorderLayout.CENTER);
+
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> inventoryDialog.dispose());
+        inventoryDialog.add(closeButton, BorderLayout.SOUTH);
+
+        inventoryDialog.setVisible(true);
     }
 
-    private void addPartToInventory() {
-        System.out.println("Enter details for the new spare part:");
-        System.out.print("ID: ");
-        String id = scanner.nextLine();
-        System.out.print("Name: ");
-        String name = scanner.nextLine();
-        System.out.print("Type: ");
-        String type = scanner.nextLine();
-        System.out.print("Category: ");
-        String category = scanner.nextLine();
-        System.out.print("Specifications: ");
-        String specifications = scanner.nextLine();
-        System.out.print("Stock Level: ");
-        int stockLevel = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
-        System.out.print("Price: ");
-        double price = scanner.nextDouble();
-        scanner.nextLine(); // Consume newline
-        System.out.print("Warranty Info: ");
-        String warrantyInfo = scanner.nextLine();
-        System.out.print("Maintenance History: ");
-        String maintenanceHistory = scanner.nextLine();
 
-        SparePart newPart = new SparePart(id, name, type, category, specifications, stockLevel, price, warrantyInfo, maintenanceHistory);
-        inventory.addSparePart(newPart);
-        System.out.println("Spare part added to inventory: " + name);
-    }
-
-    private void removePartFromInventory() {
-        System.out.print("Enter the ID of the spare part to remove: ");
-        String id = scanner.nextLine();
+    private void removePartFromInventory(String id) {
         boolean removed = inventory.removeSparePart(id);
         if (removed) {
-            System.out.println("Spare part removed from inventory.");
+        	final JDialog removeDialog = new JDialog(frame, "Update", true);
+            JLabel removeLabel = new JLabel("Spare part has been removed!", SwingConstants.CENTER);
+            removeDialog.add(removeLabel);
+            removeDialog.setSize(300, 200);
+            removeDialog.setLocationRelativeTo(frame);
+            new Timer(1000, e -> removeDialog.dispose()).start();
+            removeDialog.setVisible(true);
         } else {
-            System.out.println("Spare part not found in inventory.");
+        	final JDialog notfoundDialog = new JDialog(frame, "Update", true);
+            JLabel notfoundLabel = new JLabel("Spare Part not found!", SwingConstants.CENTER);
+            notfoundDialog.add(notfoundLabel);
+            notfoundDialog.setSize(300, 200);
+            notfoundDialog.setLocationRelativeTo(frame);
+            new Timer(1000, e -> notfoundDialog.dispose()).start();
+            notfoundDialog.setVisible(true);
         }
     }
 
@@ -218,117 +353,183 @@ public class Admin {
         SparePart part = inventory.getSparePartById(partId);
         if (part != null) {
             part.setCategory(category);
-            System.out.println("Spare part categorized: " + partId);
+            final JDialog catDialog = new JDialog(frame, "Update", true);
+            JLabel catLabel = new JLabel("Spare Part Categorized " + partId + "!" , SwingConstants.CENTER);
+            catDialog.add(catLabel);
+            catDialog.setSize(300, 200);
+            catDialog.setLocationRelativeTo(frame);
+            new Timer(1000, e -> catDialog.dispose()).start();
+            catDialog.setVisible(true);
         } else {
-            System.out.println("Spare part not found.");
+        	final JDialog notfoundDialog = new JDialog(frame, "Update", true);
+            JLabel notfoundLabel = new JLabel("Spare Part not found!", SwingConstants.CENTER);
+            notfoundDialog.add(notfoundLabel);
+            notfoundDialog.setSize(300, 200);
+            notfoundDialog.setLocationRelativeTo(frame);
+            new Timer(1000, e -> notfoundDialog.dispose()).start();
+            notfoundDialog.setVisible(true);
         }
     }
 
- // 5. Track and Manage Orders
-    public void trackAndManageOrders() {
-        boolean managingOrders = true;
-        while (managingOrders) {
-            System.out.println("\nOrder Management - Choose an option:");
-            System.out.println("1. View All Orders");
-            System.out.println("2. Update Order Status");
-            System.out.println("3. Return to Admin Mode");
+    private void trackAndManageOrders() {
+        JFrame orderFrame = new JFrame("Order Management");
+        orderFrame.setLayout(new GridLayout(0, 1));
+        orderFrame.setSize(400, 300);
 
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+        JButton viewOrdersButton = new JButton("View All Orders");
+        viewOrdersButton.addActionListener(e -> displayAllOrders());
+        orderFrame.add(viewOrdersButton);
 
-            switch (choice) {
-                case 1:
-                    displayAllOrders();
-                    break;
-                case 2:
-                    updateOrderStatus();
-                    break;
-                case 3:
-                    managingOrders = false;
-                    break;
-                default:
-                    System.out.println("Invalid option. Please try again.");
-            }
-        }
+        JButton updateOrderButton = new JButton("Update Order Status");
+        updateOrderButton.addActionListener(e -> showUpdateOrderStatusDialog());
+        orderFrame.add(updateOrderButton);
+
+        JButton returnButton = new JButton("Return");
+        returnButton.addActionListener(e -> orderFrame.dispose());
+        orderFrame.add(returnButton);
+
+        orderFrame.setVisible(true);
     }
-
+    
     private void displayAllOrders() {
+        JDialog ordersDialog = new JDialog(frame, "All Orders", true);
+        ordersDialog.setLayout(new BorderLayout());
+        ordersDialog.setSize(500, 400);
+
         List<Order> orders = orderManager.getAllOrders();
-        if (orders.isEmpty()) {
-            System.out.println("No orders found.");
-        } else {
-            System.out.println("All Orders:");
-            for (Order order : orders) {
-                System.out.println(order); // Assuming Order class has a meaningful toString() method
-            }
-        }
+        JList<Order> ordersList = new JList<>(new DefaultListModel<>());
+        DefaultListModel<Order> model = (DefaultListModel<Order>) ordersList.getModel();
+        orders.forEach(model::addElement);
+
+        JScrollPane scrollPane = new JScrollPane(ordersList);
+        ordersDialog.add(scrollPane, BorderLayout.CENTER);
+
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> ordersDialog.dispose());
+        ordersDialog.add(closeButton, BorderLayout.SOUTH);
+
+        ordersDialog.setVisible(true);
     }
 
-    private void updateOrderStatus() {
-        System.out.print("Enter the Order ID to update: ");
-        String orderId = scanner.nextLine();
-        System.out.print("Enter the new status: ");
-        String newStatus = scanner.nextLine();
+    private void showUpdateOrderStatusDialog() {
+        JDialog updateDialog = new JDialog(frame, "Update Order Status", true);
+        updateDialog.setLayout(new GridLayout(0, 2));
+        updateDialog.setSize(400, 200);
 
-        orderManager.updateOrderStatus(orderId, newStatus);
-        System.out.println("Order status updated for Order ID: " + orderId);
+        updateDialog.add(new JLabel("Order ID:"));
+        JTextField orderIdField = new JTextField(10);
+        updateDialog.add(orderIdField);
+
+        updateDialog.add(new JLabel("New Status:"));
+        JTextField statusField = new JTextField(10);
+        updateDialog.add(statusField);
+
+        JButton updateButton = new JButton("Update");
+        updateButton.addActionListener(e -> {
+            String orderId = orderIdField.getText();
+            String newStatus = statusField.getText();
+            orderManager.updateOrderStatus(orderId, newStatus);
+            updateDialog.dispose();
+        });
+        updateDialog.add(updateButton);
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(e -> updateDialog.dispose());
+        updateDialog.add(cancelButton);
+
+        updateDialog.setVisible(true);
     }
 
- // 6. Manage Shipment and Delivery
-    public void manageShipmentAndDelivery() {
-        boolean managingShipment = true;
-        while (managingShipment) {
-            System.out.println("\nShipment and Delivery Management - Choose an option:");
-            System.out.println("1. View Shipment Details for an Order");
-            System.out.println("2. Update Shipment Details for an Order");
-            System.out.println("3. Return to Admin Mode");
+    private void manageShipmentAndDelivery() {
+        JFrame shipmentFrame = new JFrame("Shipment and Delivery Management");
+        shipmentFrame.setLayout(new GridLayout(0, 1));
+        shipmentFrame.setSize(400, 300);
 
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+        JButton viewShipmentButton = new JButton("View Shipment Details");
+        viewShipmentButton.addActionListener(e -> viewShipmentDetails());
+        shipmentFrame.add(viewShipmentButton);
 
-            switch (choice) {
-                case 1:
-                    viewShipmentDetails();
-                    break;
-                case 2:
-                    updateShipmentDetails();
-                    break;
-                case 3:
-                    managingShipment = false;
-                    break;
-                default:
-                    System.out.println("Invalid option. Please try again.");
-            }
-        }
+        JButton updateShipmentButton = new JButton("Update Shipment Details");
+        updateShipmentButton.addActionListener(e -> showUpdateShipmentDetailsDialog());
+        shipmentFrame.add(updateShipmentButton);
+
+        JButton returnButton = new JButton("Return to Admin Mode");
+        returnButton.addActionListener(e -> shipmentFrame.dispose());
+        shipmentFrame.add(returnButton);
+
+        shipmentFrame.setVisible(true);
     }
 
     private void viewShipmentDetails() {
-        System.out.print("Enter the Order ID to view shipment details: ");
-        String orderId = scanner.nextLine();
-        Order order = orderManager.getOrderById(orderId).orElse(null);
+        JDialog detailsDialog = new JDialog(frame, "View Shipment Details", true);
+        detailsDialog.setLayout(new GridLayout(0, 2));
+        detailsDialog.setSize(400, 200);
 
-        if (order != null) {
-            // Assuming Order class has a method to get shipment details
-            System.out.println("Shipment Details for Order ID " + orderId + ": " + order.getStatus());
-        } else {
-            System.out.println("Order not found.");
-        }
+        detailsDialog.add(new JLabel("Order ID:"));
+        JTextField orderIdField = new JTextField(10);
+        detailsDialog.add(orderIdField);
+
+        JButton viewButton = new JButton("View");
+        viewButton.addActionListener(e -> {
+            String orderId = orderIdField.getText();
+            Optional<Order> order = orderManager.getOrderById(orderId);
+            if (order.isPresent()) {
+                // Create a string to display order details
+                StringBuilder orderDetails = new StringBuilder();
+                orderDetails.append("Order ID: ").append(order.get().getId()).append("\n");
+                orderDetails.append("Order Status: ").append(order.get().getStatus()).append("\n");
+                orderDetails.append("Spare Parts in the Order:\n").append(order.get().getOrderedParts());
+
+                JOptionPane.showMessageDialog(detailsDialog, orderDetails.toString());
+            } else {
+                JOptionPane.showMessageDialog(detailsDialog, "Order not found.");
+            }
+            detailsDialog.dispose();
+        });
+        detailsDialog.add(viewButton);
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(e -> detailsDialog.dispose());
+        detailsDialog.add(cancelButton);
+
+        detailsDialog.setVisible(true);
     }
 
-    private void updateShipmentDetails() {
-        System.out.print("Enter the Order ID to update shipment details: ");
-        String orderId = scanner.nextLine();
-        Order order = orderManager.getOrderById(orderId).orElse(null);
 
-        if (order != null) {
-            System.out.print("Enter new shipment details (Order Status): ");
-            String newShipmentDetails = scanner.nextLine();
-            // Assuming Order class has a method to set shipment details
-            order.setShipmentDetails(newShipmentDetails);
-            System.out.println("Shipment details updated for Order ID: " + orderId);
-        } else {
-            System.out.println("Order not found.");
-        }
+    private void showUpdateShipmentDetailsDialog() {
+        JDialog updateDialog = new JDialog(frame, "Update Shipment Details", true);
+        updateDialog.setLayout(new GridLayout(0, 2));
+        updateDialog.setSize(400, 200);
+
+        updateDialog.add(new JLabel("Order ID:"));
+        JTextField orderIdField = new JTextField(10);
+        updateDialog.add(orderIdField);
+
+        updateDialog.add(new JLabel("New Shipment Details:"));
+        JTextField shipmentDetailsField = new JTextField(10);
+        updateDialog.add(shipmentDetailsField);
+
+        JButton updateButton = new JButton("Update");
+        updateButton.addActionListener(e -> {
+            String orderId = orderIdField.getText();
+            String newShipmentDetails = shipmentDetailsField.getText();
+            Optional<Order> order = orderManager.getOrderById(orderId);
+            if (order.isPresent()) {
+                // Assuming Order class has a method to set shipment details
+                order.get().setShipmentDetails(newShipmentDetails);
+                JOptionPane.showMessageDialog(updateDialog, "Shipment details updated for Order ID: " + orderId);
+            } else {
+                JOptionPane.showMessageDialog(updateDialog, "Order not found.");
+            }
+            updateDialog.dispose();
+        });
+        updateDialog.add(updateButton);
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(e -> updateDialog.dispose());
+        updateDialog.add(cancelButton);
+
+        updateDialog.setVisible(true);
     }
 
     // Additional methods for admin functionalities can be added here
