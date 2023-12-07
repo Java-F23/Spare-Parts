@@ -8,7 +8,7 @@ import java.awt.event.ActionListener;
 public class CarSparePartsSystem {
 
     private static Inventory inventory = new Inventory();
-    private static OrderManager orderManager = new OrderManager();
+    private static OrderManager orderManager = new OrderManager(inventory);
     private static User user = new User(inventory);
     private static Admin admin = new Admin(inventory, orderManager);
 

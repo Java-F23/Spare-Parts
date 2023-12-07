@@ -20,7 +20,7 @@ public class User {
 
     public void userMode() {
     	// Initialize the GUI components
-        frame = new JFrame("Admin Mode");
+        frame = new JFrame("User Mode");
         frame.setLayout(new GridLayout(0, 1)); // Grid layout for buttons
         frame.setSize(600, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -34,11 +34,6 @@ public class User {
         JButton searchPartButton = new JButton("Search Spare Parts");
         searchPartButton.addActionListener(e -> searchSpareParts());
         frame.add(searchPartButton);
-
-        // Manage Inventory Button
-        JButton viewDetailButton = new JButton("View Deatiled Information");
-        viewDetailButton.addActionListener(e -> viewDetailedInformation());
-        frame.add(viewDetailButton);
 
         // Categorize Spare Parts Button
         JButton checkPartButton = new JButton("Check Availability and Stock");
@@ -82,7 +77,10 @@ public class User {
         dialog.setLayout(new BorderLayout());
 
         // Category input
-        JComboBox<String> categoryComboBox = new JComboBox<>(/* Add categories here */);
+        JComboBox<String> categoryComboBox = new JComboBox<>();
+        for (String category : inventory.getAllCategories()) {
+            categoryComboBox.addItem(category);
+        }
         dialog.add(categoryComboBox, BorderLayout.NORTH);
 
         // Results area
@@ -90,26 +88,34 @@ public class User {
         JList<SparePart> partsList = new JList<>(listModel);
         dialog.add(new JScrollPane(partsList), BorderLayout.CENTER);
 
-        // Search button
-        JButton searchButton = new JButton("Search");
-        searchButton.addActionListener(e -> {
-            String category = (String) categoryComboBox.getSelectedItem();
-            List<SparePart> parts = inventory.getSparePartsByCategory(category);
+        // Confirm button to show parts of selected category
+        JButton confirmButton = new JButton("Show Parts");
+        confirmButton.addActionListener(e -> {
+            String selectedCategory = (String) categoryComboBox.getSelectedItem();
+            List<SparePart> parts = inventory.getSparePartsByCategory(selectedCategory);
             listModel.clear();
             parts.forEach(listModel::addElement);
         });
-        dialog.add(searchButton, BorderLayout.SOUTH);
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.add(confirmButton);
 
         // Return button
         JButton returnButton = new JButton("Return");
         returnButton.addActionListener(e -> dialog.dispose());
-        dialog.add(returnButton, BorderLayout.SOUTH);
+        buttonPanel.add(returnButton);
+
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
 
         // Set dialog properties
         dialog.pack();
         dialog.setLocationRelativeTo(frame);
         dialog.setVisible(true);
     }
+
+
+
+
+
 
 
     private void searchSpareParts() {
@@ -117,14 +123,23 @@ public class User {
         JDialog dialog = new JDialog(frame, "Search Spare Parts", true);
         dialog.setLayout(new BorderLayout());
 
+        // Panel for search input and button
+        JPanel searchPanel = new JPanel();
+        searchPanel.setLayout(new FlowLayout());
+
+        // Label for search field
+        JLabel searchLabel = new JLabel("Enter by type:");
+        searchPanel.add(searchLabel);
+
         // Search criteria input
         JTextField searchField = new JTextField(20);
-        dialog.add(searchField, BorderLayout.NORTH);
+        searchPanel.add(searchField);
 
         // Results area
         DefaultListModel<SparePart> listModel = new DefaultListModel<>();
         JList<SparePart> resultsList = new JList<>(listModel);
-        dialog.add(new JScrollPane(resultsList), BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(resultsList);
+        dialog.add(scrollPane, BorderLayout.CENTER);
 
         // Search button
         JButton searchButton = new JButton("Search");
@@ -132,44 +147,17 @@ public class User {
             String criteria = searchField.getText();
             List<SparePart> results = inventory.searchSpareParts(criteria);
             listModel.clear();
-            results.forEach(listModel::addElement);
+
+            if (results.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "No results found for: " + criteria);
+            } else {
+                results.forEach(listModel::addElement);
+            }
         });
-        dialog.add(searchButton, BorderLayout.SOUTH);
+        searchPanel.add(searchButton);
 
-        // Return button
-        JButton returnButton = new JButton("Return");
-        returnButton.addActionListener(e -> dialog.dispose());
-        dialog.add(returnButton, BorderLayout.SOUTH);
-
-        // Set dialog properties
-        dialog.pack();
-        dialog.setLocationRelativeTo(frame);
-        dialog.setVisible(true);
-    }
-
-
-    private void viewDetailedInformation() {
-        // Create a new frame or dialog
-        JDialog dialog = new JDialog(frame, "View Detailed Information", true);
-        dialog.setLayout(new BorderLayout());
-
-        // Part ID input
-        JTextField partIdField = new JTextField(20);
-        dialog.add(partIdField, BorderLayout.NORTH);
-
-        // Detailed information area
-        JTextArea detailedInfoArea = new JTextArea(10, 30);
-        detailedInfoArea.setEditable(false);
-        dialog.add(new JScrollPane(detailedInfoArea), BorderLayout.CENTER);
-
-        // Fetch information button
-        JButton fetchButton = new JButton("Fetch Information");
-        fetchButton.addActionListener(e -> {
-            String partId = partIdField.getText();
-            SparePart part = inventory.getSparePartById(partId);
-            detailedInfoArea.setText(part != null ? part.getDetailedInformation() : "Part not found");
-        });
-        dialog.add(fetchButton, BorderLayout.SOUTH);
+        // Add search panel to dialog
+        dialog.add(searchPanel, BorderLayout.NORTH);
 
         // Return button
         JButton returnButton = new JButton("Return");
@@ -186,15 +174,26 @@ public class User {
     private void checkAvailabilityAndStock() {
         // Create a new frame or dialog
         JDialog dialog = new JDialog(frame, "Check Availability and Stock", true);
-        dialog.setLayout(new BorderLayout());
+        dialog.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
 
-        // Part ID input
+        // Part ID input label and field
+        JLabel partIdLabel = new JLabel("Enter Part ID:");
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        dialog.add(partIdLabel, gbc);
+
         JTextField partIdField = new JTextField(20);
-        dialog.add(partIdField, BorderLayout.NORTH);
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        dialog.add(partIdField, gbc);
 
         // Stock level display
-        JLabel stockLevelLabel = new JLabel("Enter a part ID to check stock");
-        dialog.add(stockLevelLabel, BorderLayout.CENTER);
+        JLabel stockLevelLabel = new JLabel("Stock level will be displayed here.");
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 2;
+        dialog.add(stockLevelLabel, gbc);
 
         // Check stock button
         JButton checkStockButton = new JButton("Check Stock");
@@ -207,18 +206,24 @@ public class User {
                 stockLevelLabel.setText("Part not found.");
             }
         });
-        dialog.add(checkStockButton, BorderLayout.SOUTH);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        dialog.add(checkStockButton, gbc);
 
         // Return button
         JButton returnButton = new JButton("Return");
         returnButton.addActionListener(e -> dialog.dispose());
-        dialog.add(returnButton, BorderLayout.SOUTH);
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        dialog.add(returnButton, gbc);
 
         // Set dialog properties
         dialog.pack();
         dialog.setLocationRelativeTo(frame);
         dialog.setVisible(true);
     }
+
 
 
     private void manageFavorites() {

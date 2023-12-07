@@ -1,5 +1,6 @@
 package CarSparePartsSystem;
 
+import java.util.Map;
 import javax.swing.*; 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -13,6 +14,7 @@ public class Admin {
     private JFrame frame;
     private Inventory inventory;
     private OrderManager orderManager;
+    private static final String ADMIN_PASSWORD = "admin123"; 
 
     public Admin(Inventory inventory, OrderManager orderManager) {
         this.inventory = inventory;
@@ -20,43 +22,62 @@ public class Admin {
     }
 
     public void adminMode() {
-        // Initialize the GUI components
-        frame = new JFrame("Admin Mode");
-        frame.setLayout(new GridLayout(0, 1)); // Grid layout for buttons
-        frame.setSize(600, 400);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        if (showLoginDialog()) {
+            // Initialize the GUI components only if login is successful
+            frame = new JFrame("Admin Mode");
+            frame.setLayout(new GridLayout(0, 1)); // Grid layout for buttons
+            frame.setSize(600, 400);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // Add New Spare Part Button
-        JButton addPartButton = new JButton("Add New Spare Part");
-        addPartButton.addActionListener(e -> showAddPartDialog());
-        frame.add(addPartButton);
+	        // Add New Spare Part Button
+	        JButton addPartButton = new JButton("Add New Spare Part");
+	        addPartButton.addActionListener(e -> showAddPartDialog());
+	        frame.add(addPartButton);
+	
+	        // Edit Spare Part Button
+	        JButton editPartButton = new JButton("Edit Spare Part");
+	        editPartButton.addActionListener(e -> showEditPartDialog());
+	        frame.add(editPartButton);
+	
+	        // Manage Inventory Button
+	        JButton manageInventoryButton = new JButton("Manage Inventory");
+	        manageInventoryButton.addActionListener(e -> manageInventory());
+	        frame.add(manageInventoryButton);
+	
+	        // Categorize Spare Parts Button
+	        JButton categorizePartsButton = new JButton("Categorize Spare Parts");
+	        categorizePartsButton.addActionListener(e -> showCategorizePartDialog());
+	        frame.add(categorizePartsButton);
+	
+	        // Track and Manage Orders Button
+	        JButton manageOrdersButton = new JButton("Track and Manage Orders");
+	        manageOrdersButton.addActionListener(e -> trackAndManageOrders());
+	        frame.add(manageOrdersButton);
+	
+	        // Manage Shipment and Delivery Button
+	        JButton manageShipmentButton = new JButton("Manage Shipment and Delivery");
+	        manageShipmentButton.addActionListener(e -> manageShipmentAndDelivery());
+	        frame.add(manageShipmentButton);
+	        
+	     // Track and Release Orders Button
+	        JButton releaseOrdersButton = new JButton("Release Order");
+	        releaseOrdersButton.addActionListener(e -> showReleaseOrderDialog());
+	        frame.add(releaseOrdersButton);
 
-        // Edit Spare Part Button
-        JButton editPartButton = new JButton("Edit Spare Part");
-        editPartButton.addActionListener(e -> showEditPartDialog());
-        frame.add(editPartButton);
-
-        // Manage Inventory Button
-        JButton manageInventoryButton = new JButton("Manage Inventory");
-        manageInventoryButton.addActionListener(e -> manageInventory());
-        frame.add(manageInventoryButton);
-
-        // Categorize Spare Parts Button
-        JButton categorizePartsButton = new JButton("Categorize Spare Parts");
-        categorizePartsButton.addActionListener(e -> showCategorizePartDialog());
-        frame.add(categorizePartsButton);
-
-        // Track and Manage Orders Button
-        JButton manageOrdersButton = new JButton("Track and Manage Orders");
-        manageOrdersButton.addActionListener(e -> trackAndManageOrders());
-        frame.add(manageOrdersButton);
-
-        // Manage Shipment and Delivery Button
-        JButton manageShipmentButton = new JButton("Manage Shipment and Delivery");
-        manageShipmentButton.addActionListener(e -> manageShipmentAndDelivery());
-        frame.add(manageShipmentButton);
-
-        frame.setVisible(true);
+	
+	        frame.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(null, "Incorrect password. Access denied.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private boolean showLoginDialog() {
+        JPasswordField passwordField = new JPasswordField(10);
+        int action = JOptionPane.showConfirmDialog(null, passwordField, "Enter Password", JOptionPane.OK_CANCEL_OPTION);
+        if (action == JOptionPane.OK_OPTION) {
+            return new String(passwordField.getPassword()).equals(ADMIN_PASSWORD);
+        }
+        return false;
     }
     
     private void showAddPartDialog() {
@@ -151,6 +172,10 @@ public class Admin {
         dialog.add(new JLabel("New Specifications:"));
         JTextField specificationsField = new JTextField(10);
         dialog.add(specificationsField);
+        
+        dialog.add(new JLabel("New StockLevel:"));
+        JTextField stockLevelField = new JTextField(10);
+        dialog.add(stockLevelField);
 
         // Add Submit and Cancel buttons
         JButton submitButton = new JButton("Submit");
@@ -162,8 +187,9 @@ public class Admin {
                 String newName = nameField.getText();
                 String newType = typeField.getText();
                 String newSpecifications = specificationsField.getText();
+                int newStockLevel = Integer.parseInt(stockLevelField.getText());
 
-                editSparePart(partId, newName, newType, newSpecifications);
+                editSparePart(partId, newName, newType, newSpecifications, newStockLevel);
                 dialog.dispose();
             }
         });
@@ -252,12 +278,13 @@ public class Admin {
     }
 
     // 2. Edit and Update Spare Parts
-    public void editSparePart(String partId, String newName, String newType, String newSpecifications) {
+    public void editSparePart(String partId, String newName, String newType, String newSpecifications, int newStockLevel) {
         SparePart part = inventory.getSparePartById(partId);
         if (part != null) {
             part.setName(newName);
             part.setType(newType);
             part.setSpecifications(newSpecifications);
+            part.setStockLevel(newStockLevel);
             
             final JDialog updatedDialog = new JDialog(frame, "Update", true);
             JLabel updatedLabel = new JLabel("Spare Part Updated " + partId + "!" , SwingConstants.CENTER);
@@ -266,6 +293,7 @@ public class Admin {
             updatedDialog.setLocationRelativeTo(frame);
             new Timer(1000, e -> updatedDialog.dispose()).start();
             updatedDialog.setVisible(true);
+            inventory.saveInventory();
         } else {
         	final JDialog notfoundDialog = new JDialog(frame, "Update", true);
             JLabel notfoundLabel = new JLabel("Spare Part not found!", SwingConstants.CENTER);
@@ -336,6 +364,7 @@ public class Admin {
             removeDialog.setLocationRelativeTo(frame);
             new Timer(1000, e -> removeDialog.dispose()).start();
             removeDialog.setVisible(true);
+            inventory.saveInventory();
         } else {
         	final JDialog notfoundDialog = new JDialog(frame, "Update", true);
             JLabel notfoundLabel = new JLabel("Spare Part not found!", SwingConstants.CENTER);
@@ -360,6 +389,7 @@ public class Admin {
             catDialog.setLocationRelativeTo(frame);
             new Timer(1000, e -> catDialog.dispose()).start();
             catDialog.setVisible(true);
+            inventory.saveInventory();
         } else {
         	final JDialog notfoundDialog = new JDialog(frame, "Update", true);
             JLabel notfoundLabel = new JLabel("Spare Part not found!", SwingConstants.CENTER);
@@ -516,7 +546,7 @@ public class Admin {
             Optional<Order> order = orderManager.getOrderById(orderId);
             if (order.isPresent()) {
                 // Assuming Order class has a method to set shipment details
-                order.get().setShipmentDetails(newShipmentDetails);
+                order.get().setStatus(newShipmentDetails);
                 JOptionPane.showMessageDialog(updateDialog, "Shipment details updated for Order ID: " + orderId);
             } else {
                 JOptionPane.showMessageDialog(updateDialog, "Order not found.");
@@ -531,6 +561,57 @@ public class Admin {
 
         updateDialog.setVisible(true);
     }
+    
+    private void showReleaseOrderDialog() {
+        JDialog releaseDialog = new JDialog(frame, "Release Order", true);
+        releaseDialog.setLayout(new GridLayout(0, 2));
+        releaseDialog.setSize(400, 200);
+
+        releaseDialog.add(new JLabel("Order ID:"));
+        JTextField orderIdField = new JTextField(10);
+        releaseDialog.add(orderIdField);
+
+        JButton releaseButton = new JButton("Release");
+        releaseButton.addActionListener(e -> {
+            String orderId = orderIdField.getText();
+            releaseOrder(orderId);
+            releaseDialog.dispose();
+        });
+        releaseDialog.add(releaseButton);
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(e -> releaseDialog.dispose());
+        releaseDialog.add(cancelButton);
+
+        releaseDialog.setVisible(true);
+    }
+    
+    private void releaseOrder(String orderId) {
+        Optional<Order> orderOpt = orderManager.getOrderById(orderId);
+        if (orderOpt.isPresent()) {
+            Order order = orderOpt.get();
+            order.setStatus("Delivered");
+            updateInventoryStock(order);
+            JOptionPane.showMessageDialog(frame, "Order " + orderId + " released and marked as Delivered.");
+        } else {
+            JOptionPane.showMessageDialog(frame, "Order not found.");
+        }
+    }
+
+    private void updateInventoryStock(Order order) {
+        Map<SparePart, Integer> orderedParts = order.getOrderedParts();
+        for (Map.Entry<SparePart, Integer> entry : orderedParts.entrySet()) {
+            SparePart part = entry.getKey();
+            int quantity = entry.getValue();
+            SparePart inventoryPart = inventory.getSparePartById(part.getId());
+            if (inventoryPart != null) {
+                inventoryPart.decreaseStockLevel(quantity); // Assuming SparePart has a method to decrease stock level
+            }
+        }
+        inventory.saveInventory(); // Save the updated inventory to the file
+    }
+
+
 
     // Additional methods for admin functionalities can be added here
 }
